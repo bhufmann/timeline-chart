@@ -56,6 +56,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseStartX: number;
     protected mouseEndX: number;
     protected mousePanningStart: bigint;
+    protected mousePanningPixelStart: number;
     protected mouseZoomingStart: bigint;
     protected zoomingSelection?: TimeGraphRectangle;
 
@@ -79,6 +80,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _multiClickTime: number = 500;
     private _mouseClicks = 0;
     private _multiClickTimer: DebouncedFunc<() => void>;
+    private panning = false;
 
     constructor(id: string,
         protected providers: TimeGraphChartProviders,
@@ -138,9 +140,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
 
         const panHorizontally = (magnitude: number) => {
             const timeOffset = BIMath.round(magnitude / this.stateController.zoomFactor);
-            const start = BIMath.clamp(this.mousePanningStart - timeOffset,
+             const start = BIMath.clamp(this.mousePanningStart - timeOffset,
                 BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
             const end = start + this.unitController.viewRangeLength;
+            
+            this.layer.position.x = magnitude;
+            this.panning = true;
             this.unitController.viewRange = {
                 start,
                 end
@@ -223,6 +228,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.mouseDownButton = event.data.button;
             this.mouseStartX = event.data.global.x;
             this.mousePanningStart = this.unitController.viewRange.start;
+            this.mousePanningPixelStart = this.getPixel(this.mousePanningStart);
             this.stage.cursor = 'grabbing';
         };
         this.stage.on('mousedown', this._stageMouseDownHandler);
@@ -330,7 +336,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
 
         this._viewRangeChangedHandler = () => {
-            this.updateScaleAndPosition();
+            if (!this.panning) {
+                this.updateScaleAndPosition();
+            }
+            this.panning = false;
             if (this.mouseZooming) {
                 this.updateZoomingSelection();
             }
@@ -454,6 +463,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected updateScaleAndPosition() {
+        console.log('updateScaleAndPosition');
         if (this.rows) {
             this.rows.forEach((row: TimelineChart.TimeGraphRowModel) => {
                 const rowComponent = this.rowComponents.get(row);
