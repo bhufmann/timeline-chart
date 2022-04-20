@@ -18,6 +18,8 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
 
     protected _options: TimeGraphStyledRect;
 
+    protected rendered: boolean;
+
     constructor(
         id: string,
         model: TimelineChart.TimeGraphState,
@@ -47,6 +49,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
             borderWidth: _style.borderWidth || 0,
             borderColor: _style.borderColor || 0x000000
         };
+        this.rendered = false;
     }
 
     renderLabel() {
@@ -150,12 +153,20 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
             this._options.width = opts.width;
             this._options.displayWidth = opts.displayWidth;
         }
-        super.update();
+        if (this.rendered) {
+            this.displayObject.x = this._options.position.x;
+            this.displayObject.y = this._options.position.y;
+            this.displayObject.width = this._options.width;
+            this.displayObject.height = this._options.height;
+        } else {
+            super.update();
+        }
     }
 
     render() {
         this.rect(this._options);
         this.renderLabel();
+        // this.rendered = true;
     }
 
     clear() {

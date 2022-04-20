@@ -4,7 +4,11 @@ import { TimeGraphComponent, TimeGraphParentComponent } from "../components/time
 import { TimeGraphUnitController } from "../time-graph-unit-controller";
 import { TimeGraphStateController } from "../time-graph-state-controller";
 
-export type TimeGraphLayerOptions = {}
+export type TimeGraphLayerOptions = {
+    lineColor?: number,
+    newWidth: number,
+    newHeight: number
+}
 
 export abstract class TimeGraphLayer {
     private canvas: HTMLCanvasElement;
@@ -58,7 +62,11 @@ export abstract class TimeGraphLayer {
     }
 
     protected removeChildren() {
-        this.childContainer?.destroy({ children: true });
+        if (this.childContainer) {
+            this.layer.removeChild(this.childContainer);
+            this.childContainer.destroy({ children: true });
+            this.layer.width = 0;
+        }
         this.childContainer = undefined;
         this.children = [];
     }
@@ -85,5 +93,13 @@ export abstract class TimeGraphLayer {
         this.children = [];
     }
 
-    abstract update(opts?: TimeGraphLayerOptions): void;
+    update(opts?: TimeGraphLayerOptions): void {
+        // if (this.childContainer) {
+        //     let width = this.childContainer.width;
+        //     if (opts) {
+        //         width = opts.newWidth;
+        //     }
+        //     this.childContainer.width = width;
+        // }
+    }
 }

@@ -1,8 +1,8 @@
-import * as PIXI from "pixi.js-legacy"
-import { TimeGraphUnitController } from "./time-graph-unit-controller";
-import { TimeGraphStateController } from "./time-graph-state-controller";
-import { TimeGraphLayer, TimeGraphLayerOptions } from "./layer/time-graph-layer";
+import * as PIXI from "pixi.js-legacy";
 import { TimeGraphRectangle } from "./components/time-graph-rectangle";
+import { TimeGraphLayer } from "./layer/time-graph-layer";
+import { TimeGraphStateController } from "./time-graph-state-controller";
+import { TimeGraphUnitController } from "./time-graph-unit-controller";
 
 export interface TimeGraphContainerOptions {
     id: string;
@@ -55,6 +55,8 @@ export class TimeGraphContainer {
             forceCanvas: noWebgl2
         });
 
+        console.log('contructor: width ' + canvas.width);
+        console.log('contructor: height ' + canvas.height);
         this.stage = this.application.stage;
         this._canvas = this.application.view;
 
@@ -87,11 +89,22 @@ export class TimeGraphContainer {
             this.config.backgroundColor = newColor;
         }
 
-        const opts: TimeGraphLayerOptions = { lineColor };
+        this.application.renderer.view.style.width = newWidth + 'px';
+        this.application.renderer.view.style.height = newHeight + 'px'
+        // canvas.style.height = config.height + 'px';
 
+        // const opts: TimeGraphLayerOptions = { lineColor, newWidth, newHeight };
         this.application.renderer.resize(newWidth, newHeight);
+
+        console.log('updateCanvas: view width ' + this.application.view.width);
+        console.log('updateCanvas: view height ' + this.application.view.height);
+
+        console.log('updateCanvas: canvas width ' + this._canvas.width);
+        console.log('updateCanvas: canvas height ' + this._canvas.height);
+
         this.stateController.updateDisplayWidth();
         this.stateController.updateDisplayHeight();
+
         this.background.update({
             position: {
                 x: 0, y: 0
@@ -101,7 +114,9 @@ export class TimeGraphContainer {
             color: newColor
         });
 
-        this.layers.forEach(l => l.update(opts));
+        // this.layers.forEach(l => l.update(opts));
+        this.stage.width = newWidth;
+        // this.application.renderer.render(this.stage);
     }
 
     addLayers(layers: TimeGraphLayer[]) {
